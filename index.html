@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Alias de Gmail/Googlemail (+)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 550px;
+            border: 1px solid #e0e6ed;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        p {
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #4a5568;
+            font-weight: 600;
+            text-align: left;
+        }
+        input[type="email"] {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #ccd6e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
+        input[type="email"]:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            outline: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px; /* Adicionado um pouco de espaço abaixo dos botões */
+        }
+        button {
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        #generateGmailBtn {
+            background-color: #4CAF50;
+        }
+        #generateGmailBtn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        #generateGooglemailBtn {
+            background-color: #f4b400; /* Cor mais amigável para Googlemail */
+        }
+        #generateGooglemailBtn:hover {
+            background-color: #e0a300;
+            transform: translateY(-2px);
+        }
+        #copyButton {
+            background-color: #007bff;
+            display: none;
+        }
+        #copyButton:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e6f0f7;
+            border-radius: 10px;
+            word-break: break-all;
+            font-size: 19px;
+            color: #2c3e50;
+            font-weight: bold;
+            border: 1px dashed #a4c8e0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 15px;
+            color: #d9534f;
+            font-weight: 500;
+        }
+        .message.success {
+            color: #5cb85c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Gerador de Alias de E-mail</h1>
+        <p>Use este gerador para criar **aliases de e-mail ilimitados** para sua conta Gmail/Googlemail existente. Perfeito para cadastros, newsletters e organização!</p>
+
+        <label for="baseEmail">Seu E-mail Principal (ex: seu.nome@gmail.com):</label>
+        <input type="email" id="baseEmail" placeholder="seu.nome@gmail.com" required>
+
+        <div class="button-group">
+            <button id="generateGmailBtn" onclick="generateAlias('gmail.com')">Gerar Alias @gmail.com</button>
+            <button id="generateGooglemailBtn" onclick="generateAlias('googlemail.com')">Gerar Alias @googlemail.com</button>
+        </div>
+        <button id="copyButton" onclick="copyAlias()">Copiar Alias</button>
+
+
+        <div class="result" id="aliasResult">
+            Seu alias gerado aparecerá aqui.
+        </div>
+        <div class="message" id="statusMessage"></div>
+    </div>
+
+    <script>
+        function generateAlias(domainType) {
+            const baseEmailInput = document.getElementById('baseEmail');
+            const aliasResultDiv = document.getElementById('aliasResult');
+            const statusMessageDiv = document.getElementById('statusMessage');
+            const copyButton = document.getElementById('copyButton');
+
+            const baseEmail = baseEmailInput.value.trim();
+
+            statusMessageDiv.textContent = '';
+            statusMessageDiv.className = 'message';
+            aliasResultDiv.textContent = 'Seu alias gerado aparecerá aqui.';
+            copyButton.style.display = 'none';
+
+            if (!baseEmail) {
+                statusMessageDiv.textContent = "Ops! Por favor, insira seu endereço de e-mail principal para continuar.";
+                statusMessageDiv.style.color = '#d9534f';
+                return;
+            }
+
+            // Validação para aceitar gmail.com ou googlemail.com na entrada
+            const emailRegex = /^[^\s@]+@(gmail\.com|googlemail\.com)$/i;
+            if (!emailRegex.test(baseEmail)) {
+                statusMessageDiv.textContent = "Por favor, insira um endereço de e-mail válido (@gmail.com ou @googlemail.com).";
+                statusMessageDiv.style.color = '#d9534f';
+                return;
+            }
+
+            const username = baseEmail.split('@')[0];
+            // Remove qualquer ponto do nome de usuário, pois Gmail ignora pontos
+            const cleanUsername = username.replace(/\./g, '');
+
+
+            // Gera uma string aleatória para o alias
+            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let randomString = '';
+            const length = 8;
+            for (let i = 0; i < length; i++) {
+                randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+
+            const generatedAlias = `${cleanUsername}+${randomString}@${domainType}`;
+
+            aliasResultDiv.textContent = generatedAlias;
+            copyButton.style.display = 'inline-block';
+            statusMessageDiv.textContent = "Alias gerado com sucesso! 🎉";
+            statusMessageDiv.className = 'message success';
+        }
+
+        function copyAlias() {
+            const aliasResultDiv = document.getElementById('aliasResult');
+            const statusMessageDiv = document.getElementById('statusMessage');
+            const aliasText = aliasResultDiv.textContent;
+
+            if (aliasText === 'Seu alias gerado aparecerá aqui.' || !aliasText.includes('@')) {
+                statusMessageDiv.textContent = "Nenhum alias para copiar. Gere um primeiro!";
+                statusMessageDiv.className = 'message';
+                statusMessageDiv.style.color = '#d9534f';
+                return;
+            }
+
+            navigator.clipboard.writeText(aliasText).then(() => {
+                statusMessageDiv.textContent = "Alias copiado para a área de transferência! ✔️";
+                statusMessageDiv.className = 'message success';
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                statusMessageDiv.textContent = "Erro ao copiar o alias. Por favor, copie manualmente.";
+                statusMessageDiv.style.color = '#d9534f';
+            });
+        }
+    </script>
+</body>
+</html>
