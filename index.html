@@ -243,29 +243,37 @@
             transform: translateX(20px);
         }
 
-        /* Hide/Show Modes */
+        /* Hide/Show Modes (Updated Logic) */
+        /* By default, hide advanced options, but allow JS to control display */
         #advancedOptions {
-            display: none; /* Hidden by default */
+            display: none; 
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
+            pointer-events: none; /* Disable interactions when hidden */
         }
-        body.advanced-mode #advancedOptions {
-            display: block; /* Show when advanced-mode class is active */
+        /* When 'active-mode-advanced' is on container, show advanced and hide normal */
+        .active-mode-advanced #advancedOptions {
+            display: block; /* Show advanced options */
             opacity: 1;
+            pointer-events: all; /* Enable interactions */
         }
+        .active-mode-advanced #normalOptions {
+            display: none; /* Hide normal options */
+            opacity: 0;
+            pointer-events: none; /* Disable interactions when hidden */
+        }
+
+        /* Initial state - normal options are visible by default */
         #normalOptions {
-            display: block; /* Shown by default */
+            display: block;
             opacity: 1;
             transition: opacity 0.5s ease-in-out;
-        }
-        body.advanced-mode #normalOptions {
-            display: none; /* Hide when advanced-mode class is active */
-            opacity: 0;
+            pointer-events: all;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="mainContainer">
         <h1>🔑 Gerador de Alias de E-mail</h1>
         <p>Crie **aliases ilimitados** para sua conta Gmail/Googlemail. Gerencie seus e-mails e proteja sua privacidade com flexibilidade!</p>
 
@@ -277,8 +285,8 @@
                 <h3>Alias Aleatório Simples</h3>
                 <p>Gera um alias único com uma string aleatória de 8 caracteres.</p>
                 <div class="button-group">
-                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', 8, false)">Gerar @gmail.com</button>
-                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', 8, false)">Gerar @googlemail.com</button>
+                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', 8, false, '')">Gerar @gmail.com</button>
+                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', 8, false, '')">Gerar @googlemail.com</button>
                 </div>
             </div>
         </div>
@@ -299,8 +307,8 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked)">Gerar Aleatório (@gmail.com)</button>
-                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked)">Gerar Aleatório (@googlemail.com)</button>
+                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked, '')">Gerar Aleatório (@gmail.com)</button>
+                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked, '')">Gerar Aleatório (@googlemail.com)</button>
                 </div>
             </div>
 
@@ -328,9 +336,6 @@
     <script>
         // Helper function to get elements
         const getEl = (id) => document.getElementById(id);
-
-        // State variable for mode
-        let isAdvancedMode = false;
 
         function generateAlias(domainType, aliasType, randomLength = 8, includeDots = false, customString = '') {
             const baseEmailInput = getEl('baseEmail');
@@ -362,6 +367,7 @@
 
             if (aliasType === 'custom') {
                 // If custom string is not passed as arg, get it from the input
+                // This is important if customString is passed as '' or null by the button
                 if (!customString) { 
                     customString = getEl('customAliasString').value.trim();
                 }
@@ -389,7 +395,8 @@
                 // 1. Generate the random string for after the '+'
                 const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
                 let generatedRandomString = '';
-                const effectiveRandomLength = parseInt(randomLength, 10); // Ensure it's an integer
+                // Ensure randomLength is a number and within bounds
+                const effectiveRandomLength = Math.max(4, Math.min(15, parseInt(randomLength, 10) || 8)); 
                 for (let i = 0; i < effectiveRandomLength; i++) {
                     generatedRandomString += characters.charAt(Math.floor(Math.random() * characters.length));
                 }
@@ -455,16 +462,17 @@
 
         // --- Toggle Mode Function ---
         function toggleMode() {
-            const body = document.body;
+            const mainContainer = getEl('mainContainer'); // Get the main container
             const modeToggleButton = getEl('modeToggleButton');
+            
+            // Toggle the class on the main container
+            const isAdvancedModeNow = !mainContainer.classList.contains('active-mode-advanced');
 
-            isAdvancedMode = !isAdvancedMode; // Toggle the state
-
-            if (isAdvancedMode) {
-                body.classList.add('advanced-mode');
+            if (isAdvancedModeNow) {
+                mainContainer.classList.add('active-mode-advanced');
                 modeToggleButton.textContent = 'Voltar para Modo Simples';
             } else {
-                body.classList.remove('advanced-mode');
+                mainContainer.classList.remove('active-mode-advanced');
                 modeToggleButton.textContent = 'Ir para Modo Avançado';
             }
             clearForm(); // Clear fields when changing mode for a clean start
@@ -483,10 +491,15 @@
             if (getEl('includeDots')) getEl('includeDots').checked = true;
         }
 
-        // Initial setup for the simple mode (hide advanced options by default)
+        // Initial setup on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            getEl('advancedOptions').style.display = 'none'; // Ensure hidden on load
-            getEl('advancedOptions').style.opacity = '0'; // Ensure opacity is 0 on load
+            // Initially, ensure normal options are visible and advanced are hidden
+            // The CSS handles the initial display: none for #advancedOptions
+            // and display: block for #normalOptions.
+            // This JS part ensures that if somehow the state is messed up, it resets.
+            const mainContainer = getEl('mainContainer');
+            mainContainer.classList.remove('active-mode-advanced'); // Ensure it starts in simple mode
+            getEl('modeToggleButton').textContent = 'Ir para Modo Avançado'; // Ensure button text is correct
         });
     </script>
 </body>
