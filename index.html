@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Alias de Gmail/Googlemail (+ e .)</title>
+    <title>Gerador de Alias de E-mail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
+        /* Base Styles */
         body {
             font-family: 'Poppins', sans-serif;
             display: flex;
@@ -20,6 +20,8 @@
             box-sizing: border-box;
             color: #333;
         }
+
+        /* Container */
         .container {
             background-color: #ffffff;
             padding: 40px;
@@ -27,28 +29,47 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 100%;
-            max-width: 650px;
+            max-width: 650px; /* Max-width for overall container */
             border: 1px solid #e0e6ed;
+            transition: max-width 0.4s ease-in-out; /* Smooth transition for container size */
         }
+        /* Adjusted max-width for advanced mode */
+        body.advanced-mode .container {
+            max-width: 700px; 
+        }
+
+        /* Headings & Paragraphs */
         h1 {
             color: #2c3e50;
             margin-bottom: 15px;
-            font-weight: 600;
+            font-weight: 700;
         }
         p {
             color: #555;
             margin-bottom: 25px;
             line-height: 1.6;
         }
+        h3 {
+            color: #3d5a80;
+            font-size: 1.3em;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* Labels & Inputs */
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #4a5568;
             font-weight: 600;
             text-align: left;
+            font-size: 0.95em;
         }
-        input[type="email"], input[type="text"] {
-            width: calc(100% - 24px);
+        input[type="email"],
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: calc(100% - 24px); /* Account for padding */
             padding: 12px;
             margin-bottom: 20px;
             border: 1px solid #ccd6e0;
@@ -57,74 +78,106 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             box-sizing: border-box;
         }
-        input[type="email"]:focus, input[type="text"]:focus {
+        input[type="email"]:focus,
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
             border-color: #4299e1;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
             outline: none;
         }
+
+        /* Button Sections */
         .button-section {
-            margin-bottom: 25px;
-            padding: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
             border: 1px dashed #c0d3e7;
-            border-radius: 8px;
+            border-radius: 10px;
             background-color: #f7fafd;
+            text-align: left; /* Align labels/inputs left */
         }
-        .button-section h3 {
-            margin-top: 0;
-            color: #3d5a80;
-            font-size: 1.2em;
+        .button-section p {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 5px;
             margin-bottom: 15px;
+            text-align: center; /* Center notes */
         }
+
+        /* Button Group */
         .button-group {
             display: flex;
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-top: 15px; /* Space above buttons in group */
         }
+
+        /* Buttons */
         button {
             color: white;
-            padding: 12px 20px;
+            padding: 12px 22px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            min-width: 180px; /* Ensure consistent button width */
         }
-        #generateRandomBtn, #generateRandomGooglemailBtn { /* Novo ID para o botão aleatório combinado */
-            background-color: #4CAF50;
-        }
-        #generateRandomBtn:hover, #generateRandomGooglemailBtn:hover {
-            background-color: #45a049;
+        button:hover {
             transform: translateY(-2px);
-        }
-        #generateCustomGmailBtn, #generateCustomGooglemailBtn {
-            background-color: #673ab7;
-        }
-        #generateCustomGmailBtn:hover, #generateCustomGooglemailBtn:hover {
-            background-color: #5e35b1;
-            transform: translateY(-2px);
-        }
-        /* Os estilos para botões de "pontos" separados foram removidos, pois a lógica foi combinada */
-        #copyButton {
-            background-color: #007bff;
-            display: none;
-            margin-top: 25px;
-        }
-        #copyButton:hover {
-            background-color: #0056b3;
         }
         button:active {
             transform: translateY(0);
         }
+
+        /* Specific Button Colors */
+        .btn-random {
+            background-color: #4CAF50; /* Green */
+        }
+        .btn-random:hover {
+            background-color: #45a049;
+        }
+        .btn-custom {
+            background-color: #673ab7; /* Purple */
+        }
+        .btn-custom:hover {
+            background-color: #5e35b1;
+        }
+        .btn-mode-toggle { /* Style for Advanced/Simple Mode button */
+            background-color: #17a2b8; /* Info blue */
+            min-width: unset; /* Don't force min-width */
+            margin-top: 25px;
+            margin-bottom: 20px;
+        }
+        .btn-mode-toggle:hover {
+            background-color: #138496;
+        }
+        .btn-utility {
+            background-color: #007bff; /* Blue */
+            margin-top: 25px; /* Space from other sections */
+            min-width: unset; /* Override min-width for utility buttons */
+        }
+        .btn-utility:hover {
+            background-color: #0056b3;
+        }
+        .btn-clear {
+            background-color: #f44336; /* Red for clear */
+        }
+        .btn-clear:hover {
+            background-color: #da190b;
+        }
+
+        /* Result Display */
         .result {
             margin-top: 30px;
             padding: 20px;
             background-color: #e6f0f7;
             border-radius: 10px;
             word-break: break-all;
-            font-size: 19px;
+            font-size: 20px;
             color: #2c3e50;
             font-weight: bold;
             border: 1px dashed #a4c8e0;
@@ -134,6 +187,8 @@
             justify-content: center;
             text-align: center;
         }
+
+        /* Messages */
         .message {
             margin-top: 20px;
             font-size: 15px;
@@ -143,36 +198,126 @@
         .message.success {
             color: #5cb85c;
         }
+
+        /* Checkbox/Toggle Styles */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Align checkbox to left */
+            margin-bottom: 15px;
+            gap: 10px;
+            font-size: 1em;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        .toggle-switch input[type="checkbox"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 0; /* Override default input margin */
+            vertical-align: middle; /* Align with text */
+        }
+        .toggle-switch input[type="checkbox"]:checked {
+            background-color: #4CAF50;
+        }
+        .toggle-switch input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        .toggle-switch input[type="checkbox"]:checked::before {
+            transform: translateX(20px);
+        }
+
+        /* Hide/Show Modes */
+        #advancedOptions {
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        body.advanced-mode #advancedOptions {
+            display: block; /* Show when advanced-mode class is active */
+            opacity: 1;
+        }
+        #normalOptions {
+            display: block; /* Shown by default */
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+        body.advanced-mode #normalOptions {
+            display: none; /* Hide when advanced-mode class is active */
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔑 Gerador de Alias de E-mail</h1>
-        <p>Use este gerador para criar **aliases de e-mail ilimitados** para sua conta Gmail/Googlemail existente. Perfeito para cadastros, newsletters e organização!</p>
+        <p>Crie **aliases ilimitados** para sua conta Gmail/Googlemail. Gerencie seus e-mails e proteja sua privacidade com flexibilidade!</p>
 
         <label for="baseEmail">Seu E-mail Principal (ex: seu.nome@gmail.com):</label>
         <input type="email" id="baseEmail" placeholder="seu.nome@gmail.com" required>
 
-        <div class="button-section">
-            <h3>Alias Aleatório (com "+" e/ou ".")</h3>
-            <p style="font-size:0.9em; color:#777; margin-top:5px; margin-bottom:15px;">Gera um alias único combinando letras/números e pontos.</p>
-            <div class="button-group">
-                <button id="generateRandomBtn" onclick="generateAlias('gmail.com', 'random')">Gerar Aleatório (@gmail.com)</button>
-                <button id="generateRandomGooglemailBtn" onclick="generateAlias('googlemail.com', 'random')">Gerar Aleatório (@googlemail.com)</button>
+        <div id="normalOptions">
+            <div class="button-section">
+                <h3>Alias Aleatório Simples</h3>
+                <p>Gera um alias único com uma string aleatória de 8 caracteres.</p>
+                <div class="button-group">
+                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', 8, false)">Gerar @gmail.com</button>
+                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', 8, false)">Gerar @googlemail.com</button>
+                </div>
             </div>
         </div>
 
-        <div class="button-section">
-            <h3>Alias Personalizado (+)</h3>
-            <label for="customAliasString"> Ex Conta01 (ex: "meunomeempresa"):</label>
-            <input type="text" id="customAliasString" placeholder="string-personalizada-aqui">
-            <div class="button-group">
-                <button id="generateCustomGmailBtn" onclick="generateAlias('gmail.com', 'custom')">Gerar Personalizado (@gmail.com)</button>
-                <button id="generateCustomGooglemailBtn" onclick="generateAlias('googlemail.com', 'custom')">Gerar Personalizado (@googlemail.com)</button>
+        <button id="modeToggleButton" class="btn-mode-toggle" onclick="toggleMode()">Ir para Modo Avançado</button>
+
+        <div id="advancedOptions">
+            <div class="button-section">
+                <h3>Alias Aleatório Avançado</h3>
+                <p>Gere um alias único, controlando o comprimento e a inclusão de pontos.</p>
+                
+                <label for="randomLength">Comprimento da string aleatória (depois do "+"):</label>
+                <input type="number" id="randomLength" value="8" min="4" max="15">
+
+                <div class="toggle-switch">
+                    <input type="checkbox" id="includeDots" checked>
+                    <label for="includeDots">Incluir pontos aleatórios no nome de usuário</label>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked)">Gerar Aleatório (@gmail.com)</button>
+                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked)">Gerar Aleatório (@googlemail.com)</button>
+                </div>
+            </div>
+
+            <div class="button-section">
+                <h3>Alias Personalizado (+)</h3>
+                <p>Crie um alias usando sua própria string customizada.</p>
+                <label for="customAliasString">Sua string personalizada (apenas letras, números e hífens):</label>
+                <input type="text" id="customAliasString" placeholder="nome-do-servico-ou-site">
+                <div class="button-group">
+                    <button class="btn-custom" onclick="generateAlias('gmail.com', 'custom', null, null, getEl('customAliasString').value)">Gerar Personalizado (@gmail.com)</button>
+                    <button class="btn-custom" onclick="generateAlias('googlemail.com', 'custom', null, null, getEl('customAliasString').value)">Gerar Personalizado (@googlemail.com)</button>
+                </div>
             </div>
         </div>
         
-        <button id="copyButton" onclick="copyAlias()">Copiar Alias</button>
+        <button id="copyButton" class="btn-utility" onclick="copyAlias()">Copiar Alias Gerado</button>
+        <button id="clearButton" class="btn-utility btn-clear" onclick="clearForm()">Limpar Tudo</button>
 
         <div class="result" id="aliasResult">
             Seu alias gerado aparecerá aqui.
@@ -181,98 +326,114 @@
     </div>
 
     <script>
-        function generateAlias(domainType, aliasType) {
-            const baseEmailInput = document.getElementById('baseEmail');
-            const customAliasStringInput = document.getElementById('customAliasString');
-            const aliasResultDiv = document.getElementById('aliasResult');
-            const statusMessageDiv = document.getElementById('statusMessage');
-            const copyButton = document.getElementById('copyButton');
+        // Helper function to get elements
+        const getEl = (id) => document.getElementById(id);
+
+        // State variable for mode
+        let isAdvancedMode = false;
+
+        function generateAlias(domainType, aliasType, randomLength = 8, includeDots = false, customString = '') {
+            const baseEmailInput = getEl('baseEmail');
+            const aliasResultDiv = getEl('aliasResult');
+            const statusMessageDiv = getEl('statusMessage');
+            const copyButton = getEl('copyButton');
 
             const baseEmail = baseEmailInput.value.trim();
-            const customString = customAliasStringInput.value.trim();
-
+            
+            // --- Reset UI Feedback ---
             statusMessageDiv.textContent = '';
             statusMessageDiv.className = 'message';
             aliasResultDiv.textContent = 'Seu alias gerado aparecerá aqui.';
             copyButton.style.display = 'none';
 
+            // --- Basic Validations ---
             if (!baseEmail) {
-                statusMessageDiv.textContent = "Ops! Por favor, insira seu endereço de e-mail principal para continuar.";
+                statusMessageDiv.textContent = "Por favor, insira seu endereço de e-mail principal.";
                 statusMessageDiv.style.color = '#d9534f';
                 return;
             }
 
             const emailRegex = /^[^\s@]+@(gmail\.com|googlemail\.com)$/i;
             if (!emailRegex.test(baseEmail)) {
-                statusMessageDiv.textContent = "Por favor, insira um endereço de e-mail válido (@gmail.com ou @googlemail.com).";
+                statusMessageDiv.textContent = "O e-mail principal deve ser um endereço válido (@gmail.com ou @googlemail.com).";
                 statusMessageDiv.style.color = '#d9534f';
                 return;
             }
 
-            if (aliasType === 'custom' && !customString) {
-                statusMessageDiv.textContent = "Para um alias personalizado, por favor, insira uma string no campo 'String para personalizar o alias'.";
-                statusMessageDiv.style.color = '#d9534f';
-                return;
+            if (aliasType === 'custom') {
+                // If custom string is not passed as arg, get it from the input
+                if (!customString) { 
+                    customString = getEl('customAliasString').value.trim();
+                }
+                if (!customString) {
+                    statusMessageDiv.textContent = "Para um alias personalizado, a string não pode estar vazia.";
+                    statusMessageDiv.style.color = '#d9534f';
+                    return;
+                }
+                // Stronger validation for custom string: alphanumeric and hyphens only
+                if (!/^[a-zA-Z0-9-]+$/.test(customString)) {
+                    statusMessageDiv.textContent = "A string personalizada deve conter apenas letras, números e hífens (-).";
+                    statusMessageDiv.style.color = '#d9534f';
+                    return;
+                }
             }
+            
+            // --- Alias Generation Logic ---
+            let usernamePart = baseEmail.split('@')[0];
+            const domainPart = domainType; 
 
-            if (aliasType === 'custom' && !/^[a-zA-Z0-9-]+$/.test(customString)) {
-                statusMessageDiv.textContent = "A string personalizada deve conter apenas letras, números e hífens (-).";
-                statusMessageDiv.style.color = '#d9534f';
-                return;
-            }
-
-            const username = baseEmail.split('@')[0];
-            // Remove pontos existentes do nome de usuário principal para *evitar duplicidade* ao adicionar novos pontos aleatórios.
-            // Para aliases do tipo '+' ou 'random' (que incluirá '+'), o Gmail já ignora os pontos, então é bom ter um base limpa.
-            const cleanUsernameForPlus = username.replace(/\./g, ''); 
-
-            let finalAliasPart; // Esta será a parte depois do '+' para o alias
-            let finalUsername; // Este será o nome de usuário com pontos, se aplicável
+            let finalUsername; // This will be the username potentially with dots
+            let plusString;    // This will be the string after the '+'
 
             if (aliasType === 'random') {
-                // Lógica combinada para alias aleatório com '+' e pontos no username
+                // 1. Generate the random string for after the '+'
                 const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-                let randomString = '';
-                const plusStringLength = 8; // Tamanho da string após o '+'
-                for (let i = 0; i < plusStringLength; i++) {
-                    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+                let generatedRandomString = '';
+                const effectiveRandomLength = parseInt(randomLength, 10); // Ensure it's an integer
+                for (let i = 0; i < effectiveRandomLength; i++) {
+                    generatedRandomString += characters.charAt(Math.floor(Math.random() * characters.length));
                 }
-                finalAliasPart = randomString;
+                plusString = generatedRandomString;
 
-                // Agora, adicione pontos aleatoriamente ao nome de usuário original (sem os pontos iniciais)
-                // Usamos o username original (já que é de onde queremos a variação de pontos)
-                const usernameForDots = username.replace(/\./g, ''); // Garante que a base para adicionar pontos esteja limpa
-                let dottedUsername = '';
-                for (let i = 0; i < usernameForDots.length; i++) {
-                    dottedUsername += usernameForDots[i];
-                    // Chance de adicionar um ponto (mas não no final)
-                    if (i < usernameForDots.length - 1 && Math.random() < 0.3) { // 30% de chance de adicionar um ponto
-                        dottedUsername += '.';
+                // 2. Handle dots in username if 'includeDots' is true
+                if (includeDots) {
+                    const baseForDots = usernamePart.replace(/\./g, ''); // Start with a clean username
+                    let tempUsername = '';
+                    for (let i = 0; i < baseForDots.length; i++) {
+                        tempUsername += baseForDots[i];
+                        // Add a dot randomly (30% chance), but not at the very end
+                        if (i < baseForDots.length - 1 && Math.random() < 0.3) { 
+                            tempUsername += '.';
+                        }
                     }
+                    // Ensure at least one dot if checkbox is on and username is long enough
+                    if (baseForDots.length > 1 && !tempUsername.includes('.') && Math.random() < 0.7) { 
+                         const randomIndex = Math.floor(Math.random() * (baseForDots.length - 1)) + 1;
+                         tempUsername = baseForDots.slice(0, randomIndex) + '.' + baseForDots.slice(randomIndex);
+                    }
+                    finalUsername = tempUsername;
+                } else {
+                    // If dots are not included, just remove any existing dots from the base username
+                    finalUsername = usernamePart.replace(/\./g, '');
                 }
-                // Se nenhum ponto foi adicionado e o nome de usuário é longo o suficiente, adicione pelo menos um para garantir variabilidade
-                if (usernameForDots.length > 1 && !dottedUsername.includes('.') && Math.random() < 0.5) { // 50% chance de forçar um ponto
-                     const randomIndex = Math.floor(Math.random() * (usernameForDots.length - 1)) + 1;
-                     dottedUsername = usernameForDots.slice(0, randomIndex) + '.' + usernameForDots.slice(randomIndex);
-                }
-                finalUsername = dottedUsername;
-
-                // O alias final combina o nome de usuário com pontos com o '+randomString'
-                generatedAlias = `${finalUsername}+${finalAliasPart}@${domainType}`;
-
-            } else if (aliasType === 'custom') {
-                generatedAlias = `${cleanUsernameForPlus}+${customString}@${domainType}`;
+            } else { // aliasType === 'custom'
+                finalUsername = usernamePart.replace(/\./g, ''); // Clean dots for custom type
+                plusString = customString;
             }
 
+            const generatedAlias = `${finalUsername}+${plusString}@${domainPart}`;
+
+            // --- Update UI ---
             aliasResultDiv.textContent = generatedAlias;
             copyButton.style.display = 'inline-block';
             statusMessageDiv.textContent = "Alias gerado com sucesso! 🎉";
             statusMessageDiv.className = 'message success';
         }
 
+        // --- Copy Function ---
         function copyAlias() {
-            const aliasResultDiv = document.getElementById('aliasResult');
-            const statusMessageDiv = document.getElementById('statusMessage');
+            const aliasResultDiv = getEl('aliasResult');
+            const statusMessageDiv = getEl('statusMessage');
             const aliasText = aliasResultDiv.textContent;
 
             if (aliasText === 'Seu alias gerado aparecerá aqui.' || !aliasText.includes('@')) {
@@ -291,6 +452,42 @@
                 statusMessageDiv.style.color = '#d9534f';
             });
         }
+
+        // --- Toggle Mode Function ---
+        function toggleMode() {
+            const body = document.body;
+            const modeToggleButton = getEl('modeToggleButton');
+
+            isAdvancedMode = !isAdvancedMode; // Toggle the state
+
+            if (isAdvancedMode) {
+                body.classList.add('advanced-mode');
+                modeToggleButton.textContent = 'Voltar para Modo Simples';
+            } else {
+                body.classList.remove('advanced-mode');
+                modeToggleButton.textContent = 'Ir para Modo Avançado';
+            }
+            clearForm(); // Clear fields when changing mode for a clean start
+        }
+
+        // --- Clear Form Function ---
+        function clearForm() {
+            getEl('baseEmail').value = '';
+            getEl('customAliasString').value = '';
+            getEl('aliasResult').textContent = 'Seu alias gerado aparecerá aqui.';
+            getEl('statusMessage').textContent = '';
+            getEl('statusMessage').className = 'message';
+            getEl('copyButton').style.display = 'none';
+            // Reset advanced options defaults if they exist
+            if (getEl('randomLength')) getEl('randomLength').value = 8; 
+            if (getEl('includeDots')) getEl('includeDots').checked = true;
+        }
+
+        // Initial setup for the simple mode (hide advanced options by default)
+        document.addEventListener('DOMContentLoaded', () => {
+            getEl('advancedOptions').style.display = 'none'; // Ensure hidden on load
+            getEl('advancedOptions').style.opacity = '0'; // Ensure opacity is 0 on load
+        });
     </script>
 </body>
 </html>
