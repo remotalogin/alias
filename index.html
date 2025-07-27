@@ -34,7 +34,7 @@
             transition: max-width 0.4s ease-in-out; /* Smooth transition for container size */
         }
         /* Adjusted max-width for advanced mode */
-        body.advanced-mode .container {
+        body.active-mode-advanced .container { /* Corrected class for advanced mode */
             max-width: 700px; 
         }
 
@@ -134,17 +134,17 @@
         }
 
         /* Specific Button Colors */
-        .btn-random {
+        .btn-gmail { /* Renamed for clarity */
             background-color: #4CAF50; /* Green */
         }
-        .btn-random:hover {
+        .btn-gmail:hover {
             background-color: #45a049;
         }
-        .btn-custom {
-            background-color: #673ab7; /* Purple */
+        .btn-googlemail { /* Renamed for clarity */
+            background-color: #f4b400; /* Google's Yellow-Orange */
         }
-        .btn-custom:hover {
-            background-color: #5e35b1;
+        .btn-googlemail:hover {
+            background-color: #e0a300;
         }
         .btn-mode-toggle { /* Style for Advanced/Simple Mode button */
             background-color: #17a2b8; /* Info blue */
@@ -243,27 +243,41 @@
             transform: translateX(20px);
         }
 
-        /* Hide/Show Modes (Updated Logic) */
-        /* By default, hide advanced options, but allow JS to control display */
+        /* Styling for disabled elements/sections */
+        .disabled-option { /* New class to dim and disable specific options */
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .disabled-option label,
+        .disabled-option input {
+            cursor: not-allowed !important;
+        }
+        .disabled-option input[type="checkbox"] {
+            background-color: #e0e0e0 !important;
+        }
+        .disabled-option .btn-gmail, 
+        .disabled-option .btn-googlemail { /* Keep buttons enabled or manage them separately */
+            pointer-events: all !important; /* Re-enable buttons if they are part of a disabled-option parent */
+            opacity: 1 !important;
+        }
+
+        /* Hide/Show Modes */
         #advancedOptions {
             display: none; 
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
-            pointer-events: none; /* Disable interactions when hidden */
+            pointer-events: none;
         }
-        /* When 'active-mode-advanced' is on container, show advanced and hide normal */
         .active-mode-advanced #advancedOptions {
-            display: block; /* Show advanced options */
+            display: block; 
             opacity: 1;
-            pointer-events: all; /* Enable interactions */
+            pointer-events: all;
         }
         .active-mode-advanced #normalOptions {
-            display: none; /* Hide normal options */
+            display: none; 
             opacity: 0;
-            pointer-events: none; /* Disable interactions when hidden */
+            pointer-events: none;
         }
-
-        /* Initial state - normal options are visible by default */
         #normalOptions {
             display: block;
             opacity: 1;
@@ -278,15 +292,15 @@
         <p>Crie **aliases ilimitados** para sua conta Gmail/Googlemail. Gerencie seus e-mails e proteja sua privacidade com flexibilidade!</p>
 
         <label for="baseEmail">Seu E-mail Principal (ex: seu.nome@gmail.com):</label>
-        <input type="email" id="baseEmail" placeholder="seu.nome@gmail.com" required>
+        <input type="email" id="baseEmail" placeholder="seu.nome@gmail.com" required oninput="updateModeSpecificOptions()">
 
         <div id="normalOptions">
             <div class="button-section">
                 <h3>Alias Aleatório Simples</h3>
-                <p>Gera um alias único com uma string aleatória de 8 caracteres.</p>
+                <p>Gera um alias aleatório. Para **@gmail.com** é `seuemail+aleatorio@gmail.com`. Para **@googlemail.com** é `s.e.u.email@googlemail.com` (com pontos).</p>
                 <div class="button-group">
-                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', 8, false, '')">Gerar @gmail.com</button>
-                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', 8, false, '')">Gerar @googlemail.com</button>
+                    <button class="btn-gmail" onclick="generateAlias('gmail.com', 'random', 8, false, '')" data-domain-type="gmail.com">Gerar @gmail.com</button>
+                    <button class="btn-googlemail" onclick="generateAlias('googlemail.com', 'random', 8, true, '')" data-domain-type="googlemail.com">Gerar @googlemail.com</button>
                 </div>
             </div>
         </div>
@@ -294,32 +308,39 @@
         <button id="modeToggleButton" class="btn-mode-toggle" onclick="toggleMode()">Ir para Modo Avançado</button>
 
         <div id="advancedOptions">
-            <div class="button-section">
-                <h3>Alias Aleatório Avançado</h3>
-                <p>Gere um alias único, controlando o comprimento e a inclusão de pontos.</p>
+            <div class="button-section" id="gmailPlusAliasSection">
+                <h3>Alias de Suffix (+) para Gmail</h3>
+                <p>Gere aliases usando o caracter '+' seguido por uma string (aleatória ou personalizada). <br> **Esta funcionalidade é exclusiva para @gmail.com.**</p>
                 
-                <label for="randomLength">Comprimento da string aleatória (depois do "+"):</label>
-                <input type="number" id="randomLength" value="8" min="4" max="15">
-
-                <div class="toggle-switch">
-                    <input type="checkbox" id="includeDots" checked>
-                    <label for="includeDots">Incluir pontos aleatórios no nome de usuário</label>
-                </div>
+                <label for="randomLengthGmail">Comprimento da string aleatória (depois do "+"):</label>
+                <input type="number" id="randomLengthGmail" value="8" min="4" max="15">
 
                 <div class="button-group">
-                    <button class="btn-random" onclick="generateAlias('gmail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked, '')">Gerar Aleatório (@gmail.com)</button>
-                    <button class="btn-random" onclick="generateAlias('googlemail.com', 'random', getEl('randomLength').value, getEl('includeDots').checked, '')">Gerar Aleatório (@googlemail.com)</button>
+                    <button class="btn-gmail" onclick="generateAlias('gmail.com', 'random-plus', getEl('randomLengthGmail').value, false, '')" data-domain-type="gmail.com">Gerar Aleatório + (@gmail.com)</button>
+                </div>
+
+                <label for="customAliasStringGmail">Sua string personalizada (após o "+"):</label>
+                <input type="text" id="customAliasStringGmail" placeholder="seu-alias-personalizado">
+                <div class="button-group">
+                    <button class="btn-gmail" onclick="generateAlias('gmail.com', 'custom-plus', null, null, getEl('customAliasStringGmail').value)" data-domain-type="gmail.com">Gerar Personalizado + (@gmail.com)</button>
                 </div>
             </div>
 
-            <div class="button-section">
-                <h3>Alias Personalizado (+)</h3>
-                <p>Crie um alias usando sua própria string customizada.</p>
-                <label for="customAliasString">Sua string personalizada (apenas letras, números e hífens):</label>
-                <input type="text" id="customAliasString" placeholder="nome-do-servico-ou-site">
+            <div class="button-section" id="dotAliasSection">
+                <h3>Alias com Pontos no Nome de Usuário</h3>
+                <p>Adicione pontos aleatórios no nome de usuário. <br> Para **@gmail.com**, os pontos são ignorados. Para **@googlemail.com**, os pontos são significativos e criam um alias diferente.</p>
+                
+                <div class="toggle-switch" id="toggleSwitchDots">
+                    <input type="checkbox" id="includeDots" checked>
+                    <label for="includeDots">Habilitar pontos aleatórios no nome de usuário</label>
+                </div>
+                <p style="font-size:0.85em; color:#555; margin-top:-10px; margin-bottom:15px; text-align: left;" id="dotNote">
+                    * Pontos em `@gmail.com` são ignorados. Pontos em `@googlemail.com` criam um novo alias.
+                </p>
+
                 <div class="button-group">
-                    <button class="btn-custom" onclick="generateAlias('gmail.com', 'custom', null, null, getEl('customAliasString').value)">Gerar Personalizado (@gmail.com)</button>
-                    <button class="btn-custom" onclick="generateAlias('googlemail.com', 'custom', null, null, getEl('customAliasString').value)">Gerar Personalizado (@googlemail.com)</button>
+                    <button class="btn-gmail" onclick="generateAlias('gmail.com', 'random-dots', 0, getEl('includeDots').checked, '')" data-domain-type="gmail.com">Gerar Pontos (@gmail.com)</button>
+                    <button class="btn-googlemail" onclick="generateAlias('googlemail.com', 'random-dots', 0, getEl('includeDots').checked, '')" data-domain-type="googlemail.com">Gerar Pontos (@googlemail.com)</button>
                 </div>
             </div>
         </div>
@@ -334,7 +355,6 @@
     </div>
 
     <script>
-        // Helper function to get elements
         const getEl = (id) => document.getElementById(id);
 
         function generateAlias(domainType, aliasType, randomLength = 8, includeDots = false, customString = '') {
@@ -345,13 +365,11 @@
 
             const baseEmail = baseEmailInput.value.trim();
             
-            // --- Reset UI Feedback ---
             statusMessageDiv.textContent = '';
             statusMessageDiv.className = 'message';
             aliasResultDiv.textContent = 'Seu alias gerado aparecerá aqui.';
             copyButton.style.display = 'none';
 
-            // --- Basic Validations ---
             if (!baseEmail) {
                 statusMessageDiv.textContent = "Por favor, insira seu endereço de e-mail principal.";
                 statusMessageDiv.style.color = '#d9534f';
@@ -365,79 +383,122 @@
                 return;
             }
 
-            if (aliasType === 'custom') {
-                // If custom string is not passed as arg, get it from the input
-                // This is important if customString is passed as '' or null by the button
-                if (!customString) { 
-                    customString = getEl('customAliasString').value.trim();
-                }
-                if (!customString) {
-                    statusMessageDiv.textContent = "Para um alias personalizado, a string não pode estar vazia.";
-                    statusMessageDiv.style.color = '#d9534f';
-                    return;
-                }
-                // Stronger validation for custom string: alphanumeric and hyphens only
-                if (!/^[a-zA-Z0-9-]+$/.test(customString)) {
-                    statusMessageDiv.textContent = "A string personalizada deve conter apenas letras, números e hífens (-).";
-                    statusMessageDiv.style.color = '#d9534f';
-                    return;
-                }
-            }
-            
-            // --- Alias Generation Logic ---
             let usernamePart = baseEmail.split('@')[0];
-            const domainPart = domainType; 
+            let generatedAlias = '';
 
-            let finalUsername; // This will be the username potentially with dots
-            let plusString;    // This will be the string after the '+'
-
-            if (aliasType === 'random') {
-                // 1. Generate the random string for after the '+'
-                const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-                let generatedRandomString = '';
-                // Ensure randomLength is a number and within bounds
+            // --- Gerar string aleatória (para + ou pontos) ---
+            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let randomSuffix = '';
+            if (aliasType === 'random-plus') {
                 const effectiveRandomLength = Math.max(4, Math.min(15, parseInt(randomLength, 10) || 8)); 
                 for (let i = 0; i < effectiveRandomLength; i++) {
-                    generatedRandomString += characters.charAt(Math.floor(Math.random() * characters.length));
+                    randomSuffix += characters.charAt(Math.floor(Math.random() * characters.length));
                 }
-                plusString = generatedRandomString;
-
-                // 2. Handle dots in username if 'includeDots' is true
-                if (includeDots) {
-                    const baseForDots = usernamePart.replace(/\./g, ''); // Start with a clean username
-                    let tempUsername = '';
-                    for (let i = 0; i < baseForDots.length; i++) {
-                        tempUsername += baseForDots[i];
-                        // Add a dot randomly (30% chance), but not at the very end
-                        if (i < baseForDots.length - 1 && Math.random() < 0.3) { 
-                            tempUsername += '.';
-                        }
-                    }
-                    // Ensure at least one dot if checkbox is on and username is long enough
-                    if (baseForDots.length > 1 && !tempUsername.includes('.') && Math.random() < 0.7) { 
-                         const randomIndex = Math.floor(Math.random() * (baseForDots.length - 1)) + 1;
-                         tempUsername = baseForDots.slice(0, randomIndex) + '.' + baseForDots.slice(randomIndex);
-                    }
-                    finalUsername = tempUsername;
-                } else {
-                    // If dots are not included, just remove any existing dots from the base username
-                    finalUsername = usernamePart.replace(/\./g, '');
-                }
-            } else { // aliasType === 'custom'
-                finalUsername = usernamePart.replace(/\./g, ''); // Clean dots for custom type
-                plusString = customString;
+            } else if (aliasType === 'random-dots') {
+                 // No suffix needed for random-dots, it manipulates the username itself
             }
 
-            const generatedAlias = `${finalUsername}+${plusString}@${domainPart}`;
+            // --- Lógica de Geração de Alias por Tipo e Domínio ---
+            if (domainType === 'gmail.com') {
+                const cleanUsername = usernamePart.replace(/\./g, ''); // Gmail ignora pontos para a base
 
-            // --- Update UI ---
+                if (aliasType === 'random-plus') {
+                    generatedAlias = `${cleanUsername}+${randomSuffix}@gmail.com`;
+                } else if (aliasType === 'custom-plus') {
+                    const custom = customString || getEl('customAliasStringGmail').value.trim();
+                    if (!custom) {
+                        statusMessageDiv.textContent = "Para um alias personalizado, a string não pode estar vazia.";
+                        statusMessageDiv.style.color = '#d9534f';
+                        return;
+                    }
+                    if (!/^[a-zA-Z0-9-]+$/.test(custom)) {
+                        statusMessageDiv.textContent = "A string personalizada deve conter apenas letras, números e hífens (-).";
+                        statusMessageDiv.style.color = '#d9534f';
+                        return;
+                    }
+                    generatedAlias = `${cleanUsername}+${custom}@gmail.com`;
+                } else if (aliasType === 'random-dots') { // Gerar pontos para Gmail (serão ignorados, mas é um "alias" válido)
+                    if (!includeDots) {
+                        statusMessageDiv.textContent = "Selecione 'Habilitar pontos aleatórios' para gerar um alias com pontos.";
+                        statusMessageDiv.style.color = '#d9534f';
+                        return;
+                    }
+                    let tempUsernameWithDots = '';
+                    // Generate points only if includeDots is true and domain is gmail.com
+                    const baseForDots = usernamePart.replace(/\./g, ''); 
+                    for (let i = 0; i < baseForDots.length; i++) {
+                        tempUsernameWithDots += baseForDots[i];
+                        if (i < baseForDots.length - 1 && Math.random() < 0.3) { 
+                            tempUsernameWithDots += '.';
+                        }
+                    }
+                    if (baseForDots.length > 1 && !tempUsernameWithDots.includes('.') && Math.random() < 0.7) { 
+                         const randomIndex = Math.floor(Math.random() * (baseForDots.length - 1)) + 1;
+                         tempUsernameWithDots = baseForDots.slice(0, randomIndex) + '.' + baseForDots.slice(randomIndex);
+                    }
+                    generatedAlias = `${tempUsernameWithDots}@gmail.com`;
+                }
+            } 
+            else if (domainType === 'googlemail.com') {
+                const originalUsername = usernamePart; // Googlemail considera pontos
+
+                // Para Googlemail, qualquer geração de alias será com pontos, e SEM o '+'
+                if (aliasType === 'random-dots' || aliasType === 'random' || aliasType === 'random-plus') { // Modo normal ou random-dots
+                    if (!includeDots && getEl('mainContainer').classList.contains('active-mode-advanced')) { // If in advanced, and checkbox is OFF
+                         statusMessageDiv.textContent = "Para @googlemail.com, a geração de alias no modo avançado implica em adicionar pontos.";
+                         statusMessageDiv.style.color = '#d9534f';
+                         return;
+                    }
+                    let tempUsernameWithDots = '';
+                    const baseForDots = originalUsername.replace(/\./g, ''); // Começa de uma base limpa para adicionar pontos
+                    if (baseForDots.length === 0) {
+                        statusMessageDiv.textContent = "Nome de usuário muito curto para adicionar pontos.";
+                        statusMessageDiv.style.color = '#d9534f';
+                        return;
+                    }
+
+                    // Forçar pelo menos um ponto se o nome de usuário for grande o suficiente
+                    if (baseForDots.length > 1) {
+                         // Garante que pelo menos um ponto é adicionado, e pode adicionar mais
+                        let currentUsername = baseForDots[0];
+                        for (let i = 1; i < baseForDots.length; i++) {
+                            // Adiciona ponto a cada 2-4 caracteres ou aleatoriamente
+                            if ((i % 3 === 0 && i < baseForDots.length -1) || (Math.random() < 0.4 && i < baseForDots.length -1)) {
+                                currentUsername += '.';
+                            }
+                            currentUsername += baseForDots[i];
+                        }
+                        // Fallback para garantir que tem pelo menos um ponto se o loop acima não adicionou e username é longo
+                        if (!currentUsername.includes('.') && baseForDots.length > 1) {
+                            const insertPos = Math.floor(baseForDots.length / 2);
+                            currentUsername = baseForDots.slice(0, insertPos) + '.' + baseForDots.slice(insertPos);
+                        }
+                        tempUsernameWithDots = currentUsername;
+                    } else { // Username is too short for meaningful dot alias, just use original
+                        tempUsernameWithDots = originalUsername;
+                    }
+
+                    generatedAlias = `${tempUsernameWithDots}@googlemail.com`;
+
+                } else if (aliasType === 'custom-plus') { // Custom alias for googlemail.com - just remove '+' part from prompt, only dot aliases are valid
+                    statusMessageDiv.textContent = "Aliases com '+' não são suportados para @googlemail.com. Apenas aliases com pontos são válidos.";
+                    statusMessageDiv.style.color = '#d9534f';
+                    return;
+                }
+            }
+
+            if (!generatedAlias) {
+                statusMessageDiv.textContent = "Não foi possível gerar o alias. Verifique suas opções.";
+                statusMessageDiv.style.color = '#d9534f';
+                return;
+            }
+
             aliasResultDiv.textContent = generatedAlias;
             copyButton.style.display = 'inline-block';
             statusMessageDiv.textContent = "Alias gerado com sucesso! 🎉";
             statusMessageDiv.className = 'message success';
         }
 
-        // --- Copy Function ---
         function copyAlias() {
             const aliasResultDiv = getEl('aliasResult');
             const statusMessageDiv = getEl('statusMessage');
@@ -460,12 +521,10 @@
             });
         }
 
-        // --- Toggle Mode Function ---
         function toggleMode() {
-            const mainContainer = getEl('mainContainer'); // Get the main container
+            const mainContainer = getEl('mainContainer'); 
             const modeToggleButton = getEl('modeToggleButton');
             
-            // Toggle the class on the main container
             const isAdvancedModeNow = !mainContainer.classList.contains('active-mode-advanced');
 
             if (isAdvancedModeNow) {
@@ -475,31 +534,97 @@
                 mainContainer.classList.remove('active-mode-advanced');
                 modeToggleButton.textContent = 'Ir para Modo Avançado';
             }
-            clearForm(); // Clear fields when changing mode for a clean start
+            clearForm();
+            updateModeSpecificOptions(); // Update options visibility based on mode and domain
         }
 
-        // --- Clear Form Function ---
         function clearForm() {
             getEl('baseEmail').value = '';
-            getEl('customAliasString').value = '';
+            getEl('customAliasStringGmail').value = '';
+            getEl('randomLengthGmail').value = 8;
+            getEl('includeDots').checked = true; // Reset checkbox to checked for Gmail
             getEl('aliasResult').textContent = 'Seu alias gerado aparecerá aqui.';
             getEl('statusMessage').textContent = '';
             getEl('statusMessage').className = 'message';
             getEl('copyButton').style.display = 'none';
-            // Reset advanced options defaults if they exist
-            if (getEl('randomLength')) getEl('randomLength').value = 8; 
-            if (getEl('includeDots')) getEl('includeDots').checked = true;
+            updateModeSpecificOptions(); // Call to update options state
+        }
+
+        // --- NEW/UPDATED FUNCTION: updateModeSpecificOptions ---
+        // This function now manages visibility/disability of options based on current domain AND mode
+        function updateModeSpecificOptions() {
+            const baseEmailInput = getEl('baseEmail');
+            const emailValue = baseEmailInput.value.trim();
+            const emailDomain = emailValue.split('@')[1];
+
+            const gmailPlusAliasSection = getEl('gmailPlusAliasSection');
+            const dotAliasSection = getEl('dotAliasSection');
+            const toggleSwitchDotsDiv = getEl('toggleSwitchDots');
+            const includeDotsCheckbox = getEl('includeDots');
+            const customAliasStringGmail = getEl('customAliasStringGmail');
+            const randomLengthGmail = getEl('randomLengthGmail');
+
+            const isAdvancedModeActive = getEl('mainContainer').classList.contains('active-mode-advanced');
+
+            if (isAdvancedModeActive) {
+                if (emailDomain === 'googlemail.com') {
+                    // Hide Gmail-specific (+) alias section
+                    gmailPlusAliasSection.classList.add('disabled-option');
+                    gmailPlusAliasSection.style.display = 'none'; // Ensure it's hidden
+
+                    // Force dot alias logic for Googlemail
+                    dotAliasSection.classList.remove('disabled-option'); // Ensure dot section is enabled
+                    dotAliasSection.style.display = 'block'; // Ensure dot section is visible
+
+                    // Control dot checkbox state for Googlemail
+                    includeDotsCheckbox.disabled = true; // Disable checkbox
+                    includeDotsCheckbox.checked = true; // Force checked state
+                    toggleSwitchDotsDiv.classList.add('disabled-option'); // Dim the toggle switch
+
+                    // Update dot note for Googlemail context
+                    getEl('dotNote').textContent = "* Para @googlemail.com, a geração de alias implica em adicionar pontos no nome de usuário.";
+
+                } else { // Default to gmail.com logic
+                    // Show Gmail-specific (+) alias section
+                    gmailPlusAliasSection.classList.remove('disabled-option');
+                    gmailPlusAliasSection.style.display = 'block';
+
+                    // Show dot alias section
+                    dotAliasSection.classList.remove('disabled-option');
+                    dotAliasSection.style.display = 'block';
+
+                    // Enable dot checkbox for Gmail
+                    includeDotsCheckbox.disabled = false;
+                    toggleSwitchDotsDiv.classList.remove('disabled-option');
+                    
+                    // Reset dot note for Gmail context
+                    getEl('dotNote').textContent = "* Pontos em `@gmail.com` são ignorados. Pontos em `@googlemail.com` criam um novo alias.";
+                }
+            } else { // Normal Mode - no advanced options visible/controlled here, just hide advanced sections
+                gmailPlusAliasSection.classList.add('disabled-option');
+                gmailPlusAliasSection.style.display = 'none';
+                dotAliasSection.classList.add('disabled-option');
+                dotAliasSection.style.display = 'none';
+            }
+
+            // Also, disable custom string and random length for Gmail when no domain is selected or invalid
+            // This ensures inputs are consistent with button states
+            if (!emailDomain || (emailDomain !== 'gmail.com' && emailDomain !== 'googlemail.com')) {
+                gmailPlusAliasSection.classList.add('disabled-option');
+                dotAliasSection.classList.add('disabled-option');
+            } else if (emailDomain === 'gmail.com' && isAdvancedModeActive) {
+                 // Re-enable for Gmail in advanced mode if it was disabled by invalid email
+                gmailPlusAliasSection.classList.remove('disabled-option');
+                dotAliasSection.classList.remove('disabled-option');
+            }
         }
 
         // Initial setup on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            // Initially, ensure normal options are visible and advanced are hidden
-            // The CSS handles the initial display: none for #advancedOptions
-            // and display: block for #normalOptions.
-            // This JS part ensures that if somehow the state is messed up, it resets.
             const mainContainer = getEl('mainContainer');
-            mainContainer.classList.remove('active-mode-advanced'); // Ensure it starts in simple mode
-            getEl('modeToggleButton').textContent = 'Ir para Modo Avançado'; // Ensure button text is correct
+            mainContainer.classList.remove('active-mode-advanced'); 
+            getEl('modeToggleButton').textContent = 'Ir para Modo Avançado'; 
+            updateModeSpecificOptions(); // Initial call to set options state
         });
     </script>
 </body>
