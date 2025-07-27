@@ -27,7 +27,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 100%;
-            max-width: 650px; /* Aumentado um pouco para acomodar mais botões */
+            max-width: 650px;
             border: 1px solid #e0e6ed;
         }
         h1 {
@@ -62,7 +62,7 @@
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
             outline: none;
         }
-        .button-section { /* Nova classe para agrupar botões por tipo */
+        .button-section {
             margin-bottom: 25px;
             padding: 15px;
             border: 1px dashed #c0d3e7;
@@ -83,40 +83,34 @@
         }
         button {
             color: white;
-            padding: 12px 20px; /* Ajustado um pouco o padding para botões */
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px; /* Ajustado tamanho da fonte */
+            font-size: 16px;
             font-weight: 600;
             transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-        #generateGmailBtn, #generateGooglemailBtn { /* Botões aleatórios */
+        #generateRandomBtn, #generateRandomGooglemailBtn { /* Novo ID para o botão aleatório combinado */
             background-color: #4CAF50;
         }
-        #generateGmailBtn:hover, #generateGooglemailBtn:hover {
+        #generateRandomBtn:hover, #generateRandomGooglemailBtn:hover {
             background-color: #45a049;
             transform: translateY(-2px);
         }
-        #generateCustomGmailBtn, #generateCustomGooglemailBtn { /* Botões personalizados */
-            background-color: #673ab7; /* Roxo */
+        #generateCustomGmailBtn, #generateCustomGooglemailBtn {
+            background-color: #673ab7;
         }
         #generateCustomGmailBtn:hover, #generateCustomGooglemailBtn:hover {
             background-color: #5e35b1;
             transform: translateY(-2px);
         }
-        #generateDotGmailBtn, #generateDotGooglemailBtn { /* Botões de ponto */
-            background-color: #00bcd4; /* Azul-claro */
-        }
-        #generateDotGmailBtn:hover, #generateDotGooglemailBtn:hover {
-            background-color: #00acc1;
-            transform: translateY(-2px);
-        }
+        /* Os estilos para botões de "pontos" separados foram removidos, pois a lógica foi combinada */
         #copyButton {
             background-color: #007bff;
             display: none;
-            margin-top: 25px; /* Espaço acima do botão copiar */
+            margin-top: 25px;
         }
         #copyButton:hover {
             background-color: #0056b3;
@@ -160,29 +154,21 @@
         <input type="email" id="baseEmail" placeholder="seu.nome@gmail.com" required>
 
         <div class="button-section">
-            <h3>Alias com Sinal de Mais (+)</h3>
+            <h3>Alias Aleatório (com "+" e/ou ".")</h3>
+            <p style="font-size:0.9em; color:#777; margin-top:5px; margin-bottom:15px;">Gera um alias único combinando letras/números e pontos.</p>
             <div class="button-group">
-                <button id="generateGmailBtn" onclick="generateAlias('gmail.com', 'random')">Gerar @gmail.com (Aleatório)</button>
-                <button id="generateGooglemailBtn" onclick="generateAlias('googlemail.com', 'random')">Gerar @googlemail.com (Aleatório)</button>
+                <button id="generateRandomBtn" onclick="generateAlias('gmail.com', 'random')">Gerar Aleatório (@gmail.com)</button>
+                <button id="generateRandomGooglemailBtn" onclick="generateAlias('googlemail.com', 'random')">Gerar Aleatório (@googlemail.com)</button>
             </div>
         </div>
 
         <div class="button-section">
             <h3>Alias Personalizado (+)</h3>
-            <label for="customAliasString">String para personalizar o alias (ex: "meunomeempresa"):</label>
+            <label for="customAliasString"> Ex Conta01 (ex: "meunomeempresa"):</label>
             <input type="text" id="customAliasString" placeholder="string-personalizada-aqui">
             <div class="button-group">
                 <button id="generateCustomGmailBtn" onclick="generateAlias('gmail.com', 'custom')">Gerar Personalizado (@gmail.com)</button>
                 <button id="generateCustomGooglemailBtn" onclick="generateAlias('googlemail.com', 'custom')">Gerar Personalizado (@googlemail.com)</button>
-            </div>
-        </div>
-
-        <div class="button-section">
-            <h3>Alias com Pontos (.)</h3>
-            <p style="font-size:0.9em; color:#777; margin-top:5px; margin-bottom:15px;">O Gmail ignora pontos. Este alias chegará na mesma caixa de entrada.</p>
-            <div class="button-group">
-                <button id="generateDotGmailBtn" onclick="generateAlias('gmail.com', 'dots')">Gerar Com Pontos (@gmail.com)</button>
-                <button id="generateDotGooglemailBtn" onclick="generateAlias('googlemail.com', 'dots')">Gerar Com Pontos (@googlemail.com)</button>
             </div>
         </div>
         
@@ -235,43 +221,47 @@
                 return;
             }
 
-
             const username = baseEmail.split('@')[0];
-            // Remove qualquer ponto do nome de usuário ANTES de processar para aliases de + ou .
-            const cleanUsername = username.replace(/\./g, '');
+            // Remove pontos existentes do nome de usuário principal para *evitar duplicidade* ao adicionar novos pontos aleatórios.
+            // Para aliases do tipo '+' ou 'random' (que incluirá '+'), o Gmail já ignora os pontos, então é bom ter um base limpa.
+            const cleanUsernameForPlus = username.replace(/\./g, ''); 
 
-            let generatedAlias;
+            let finalAliasPart; // Esta será a parte depois do '+' para o alias
+            let finalUsername; // Este será o nome de usuário com pontos, se aplicável
+
             if (aliasType === 'random') {
+                // Lógica combinada para alias aleatório com '+' e pontos no username
                 const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
                 let randomString = '';
-                const length = 8;
-                for (let i = 0; i < length; i++) {
+                const plusStringLength = 8; // Tamanho da string após o '+'
+                for (let i = 0; i < plusStringLength; i++) {
                     randomString += characters.charAt(Math.floor(Math.random() * characters.length));
                 }
-                generatedAlias = `${cleanUsername}+${randomString}@${domainType}`;
-            } else if (aliasType === 'custom') {
-                generatedAlias = `${cleanUsername}+${customString}@${domainType}`;
-            } else if (aliasType === 'dots') {
-                // Gera um alias com pontos aleatórios
-                // Pegamos o nome de usuário original e inserimos pontos
-                // Primeiro, removemos pontos existentes para garantir que a adição seja controlada
-                const originalUsernameWithoutDots = username.replace(/\./g, '');
+                finalAliasPart = randomString;
+
+                // Agora, adicione pontos aleatoriamente ao nome de usuário original (sem os pontos iniciais)
+                // Usamos o username original (já que é de onde queremos a variação de pontos)
+                const usernameForDots = username.replace(/\./g, ''); // Garante que a base para adicionar pontos esteja limpa
                 let dottedUsername = '';
-                for (let i = 0; i < originalUsernameWithoutDots.length; i++) {
-                    dottedUsername += originalUsernameWithoutDots[i];
-                    // Adiciona um ponto aleatoriamente, mas não no final
-                    if (i < originalUsernameWithoutDots.length - 1 && Math.random() < 0.4) { // 40% chance de adicionar um ponto
+                for (let i = 0; i < usernameForDots.length; i++) {
+                    dottedUsername += usernameForDots[i];
+                    // Chance de adicionar um ponto (mas não no final)
+                    if (i < usernameForDots.length - 1 && Math.random() < 0.3) { // 30% de chance de adicionar um ponto
                         dottedUsername += '.';
                     }
                 }
-                // Se o nome de usuário original for tipo "a.b.c", "abc" será o base para os pontos aleatórios
-                // Para garantir que sempre haja pelo menos um ponto se o nome de usuário original não tiver nenhum
-                if (originalUsernameWithoutDots.length > 1 && !dottedUsername.includes('.')) {
-                    // Adiciona um ponto em uma posição aleatória se não houver nenhum
-                    const randomIndex = Math.floor(Math.random() * (originalUsernameWithoutDots.length - 1)) + 1;
-                    dottedUsername = originalUsernameWithoutDots.slice(0, randomIndex) + '.' + originalUsernameWithoutDots.slice(randomIndex);
+                // Se nenhum ponto foi adicionado e o nome de usuário é longo o suficiente, adicione pelo menos um para garantir variabilidade
+                if (usernameForDots.length > 1 && !dottedUsername.includes('.') && Math.random() < 0.5) { // 50% chance de forçar um ponto
+                     const randomIndex = Math.floor(Math.random() * (usernameForDots.length - 1)) + 1;
+                     dottedUsername = usernameForDots.slice(0, randomIndex) + '.' + usernameForDots.slice(randomIndex);
                 }
-                generatedAlias = `${dottedUsername}@${domainType}`;
+                finalUsername = dottedUsername;
+
+                // O alias final combina o nome de usuário com pontos com o '+randomString'
+                generatedAlias = `${finalUsername}+${finalAliasPart}@${domainType}`;
+
+            } else if (aliasType === 'custom') {
+                generatedAlias = `${cleanUsernameForPlus}+${customString}@${domainType}`;
             }
 
             aliasResultDiv.textContent = generatedAlias;
